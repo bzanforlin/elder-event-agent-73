@@ -62,6 +62,7 @@ const EventPlanning = () => {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [suggestedResidents, setSuggestedResidents] = useState<number[]>([]);
   const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [lastEventUpdate, setLastEventUpdate] = useState<string>("");
 
   // Load data from API
   useEffect(() => {
@@ -88,6 +89,9 @@ const EventPlanning = () => {
             duration_minutes: eventData.duration_minutes,
             invitees: eventData.invitees?.map((inv) => inv.elder) || [],
           });
+
+          // Initialize event update tracking
+          setLastEventUpdate(JSON.stringify(eventData.invitees));
 
           // Load existing chat messages
           try {
@@ -145,25 +149,51 @@ const EventPlanning = () => {
     loadData();
   }, [isEditing, eventId, toast]);
 
-  // Polling for new messages (only for existing events)
+  // Polling for new messages and event updates (only for existing events)
   useEffect(() => {
     if (!isEditing || !eventId) return;
 
-    const pollForMessages = async () => {
+    const pollForUpdates = async () => {
       try {
+        // Poll for new messages
         const messages = await chatApi.getEventMessages(parseInt(eventId));
         if (messages.length > lastMessageCount) {
           setChatMessages(messages);
           setLastMessageCount(messages.length);
         }
+
+        // Poll for event updates (invitees changes)
+        const eventData = await eventApi.get(parseInt(eventId));
+        const currentEventUpdate = JSON.stringify(eventData.invitees);
+
+        if (lastEventUpdate && currentEventUpdate !== lastEventUpdate) {
+          // Event invitees have changed, update the form
+          setEvent((prev) => ({
+            ...prev,
+            invitees: eventData.invitees?.map((inv) => inv.elder) || [],
+          }));
+
+          toast({
+            title: "Event Updated",
+            description:
+              "The invitation list has been updated by the AI assistant.",
+          });
+        }
+
+        if (!lastEventUpdate) {
+          // First time setting the event update state
+          setLastEventUpdate(currentEventUpdate);
+        } else if (currentEventUpdate !== lastEventUpdate) {
+          setLastEventUpdate(currentEventUpdate);
+        }
       } catch (error) {
-        console.error("Error polling for messages:", error);
+        console.error("Error polling for updates:", error);
       }
     };
 
-    const interval = setInterval(pollForMessages, 3000); // Poll every 3 seconds
+    const interval = setInterval(pollForUpdates, 3000); // Poll every 3 seconds
     return () => clearInterval(interval);
-  }, [isEditing, eventId, lastMessageCount]);
+  }, [isEditing, eventId, lastMessageCount, lastEventUpdate, toast]);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -374,6 +404,12 @@ const EventPlanning = () => {
                     </Badge>
                   )}
                 </CardTitle>
+                {isEditing && eventId && (
+                  <p className="text-xs text-[#7F4F61]/70 mt-1">
+                    💡 I can help you add or remove residents from the
+                    invitation list. Just ask!
+                  </p>
+                )}
               </CardHeader>
               <CardContent className="flex flex-col flex-1 p-6 pt-0">
                 <ScrollArea className="flex-1 pr-4 mb-4">
