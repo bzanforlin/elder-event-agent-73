@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Save, Calendar, Clock, Users, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Send, Save, Calendar, Clock, Users, ArrowLeft, Plus } from 'lucide-react';
 
 interface Elder {
   id: number;
@@ -50,6 +50,7 @@ const EventPlanning = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [suggestedResidents, setSuggestedResidents] = useState<number[]>([]);
 
   // Mock data
   useEffect(() => {
@@ -96,6 +97,8 @@ const EventPlanning = () => {
           timestamp: new Date().toISOString()
         }
       ]);
+
+      setSuggestedResidents([1, 3]);
     } else {
       setChatMessages([
         {
@@ -105,6 +108,8 @@ const EventPlanning = () => {
           timestamp: new Date().toISOString()
         }
       ]);
+
+      setSuggestedResidents([]);
     }
   }, [isEditing]);
 
@@ -145,6 +150,16 @@ const EventPlanning = () => {
     }));
   };
 
+  const handleSelectResident = (residentId: string) => {
+    const id = parseInt(residentId);
+    if (!event.invitees.includes(id)) {
+      setEvent(prev => ({
+        ...prev,
+        invitees: [...prev.invitees, id]
+      }));
+    }
+  };
+
   const saveEvent = () => {
     // In real app, this would make API call
     console.log('Saving event:', event);
@@ -152,33 +167,36 @@ const EventPlanning = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-6">
+    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(to bottom right, #AFD0CD, #EFD492)' }}>
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center mb-6">
+        <div className="mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate('/events')}
-            className="mr-4 text-gray-600 hover:text-gray-800"
+            className="mb-4 text-[#7F4F61] hover:text-[#7F4F61]/80"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Events
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isEditing ? 'Edit Event' : 'Plan New Event'}
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold text-[#7F4F61] mb-2">
+              {isEditing ? 'Edit Event' : 'Plan New Event'}
+            </h1>
+            <p className="text-[#7F4F61]">Create engaging activities for your residents</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Chat Section */}
-          <Card className="bg-white shadow-lg">
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61] flex flex-col">
             <CardHeader>
-              <CardTitle className="flex items-center text-purple-800">
+              <CardTitle className="flex items-center text-[#7F4F61]">
                 <Users className="mr-2 h-5 w-5" />
                 AI Event Planner
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <ScrollArea className="h-96 pr-4">
+            <CardContent className="flex flex-col flex-1 p-6 pt-0">
+              <ScrollArea className="flex-1 pr-4 mb-4">
                 <div className="space-y-4">
                   {chatMessages.map((message) => (
                     <div
@@ -188,8 +206,8 @@ const EventPlanning = () => {
                       <div
                         className={`max-w-[80%] p-3 rounded-lg ${
                           message.sender === 'user'
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-[#C08777] text-white'
+                            : 'bg-[#AFD0CD]/20 text-[#7F4F61]'
                         }`}
                       >
                         <p className="text-sm">{message.message}</p>
@@ -198,7 +216,7 @@ const EventPlanning = () => {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
+                      <div className="bg-[#AFD0CD]/20 text-[#7F4F61] p-3 rounded-lg">
                         <p className="text-sm">AI is thinking...</p>
                       </div>
                     </div>
@@ -206,14 +224,19 @@ const EventPlanning = () => {
                 </div>
               </ScrollArea>
 
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 mt-auto pt-4 border-t border-[#AFD0CD]/30">
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Ask about event planning..."
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  className="border-[#C08777]/30 focus:border-[#C08777]"
                 />
-                <Button onClick={sendMessage} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700">
+                <Button 
+                  onClick={sendMessage} 
+                  disabled={isLoading} 
+                  className="bg-[#C08777] hover:bg-[#C08777]/90 text-white"
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
@@ -221,27 +244,28 @@ const EventPlanning = () => {
           </Card>
 
           {/* Event Details Section */}
-          <Card className="bg-white shadow-lg">
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61]">
             <CardHeader>
-              <CardTitle className="flex items-center text-purple-800">
+              <CardTitle className="flex items-center text-[#7F4F61]">
                 <Calendar className="mr-2 h-5 w-5" />
                 Event Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                   Event Title
                 </label>
                 <Input
                   value={event.title}
                   onChange={(e) => setEvent(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter event title"
+                  className="border-[#C08777]/30 focus:border-[#C08777]"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                   Description
                 </label>
                 <Textarea
@@ -249,72 +273,144 @@ const EventPlanning = () => {
                   onChange={(e) => setEvent(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Describe the event"
                   rows={3}
+                  className="border-[#C08777]/30 focus:border-[#C08777]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Date & Time
                   </label>
                   <Input
                     type="datetime-local"
                     value={event.date}
                     onChange={(e) => setEvent(prev => ({ ...prev, date: e.target.value }))}
+                    className="border-[#C08777]/30 focus:border-[#C08777]"
                   />
                 </div>
-
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Duration (minutes)
                   </label>
                   <Input
                     type="number"
                     value={event.duration_minutes}
-                    onChange={(e) => setEvent(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) || 60 }))}
+                    onChange={(e) => setEvent(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) }))}
                     min="15"
                     step="15"
+                    className="border-[#C08777]/30 focus:border-[#C08777]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-3 block">
+                <label className="text-sm font-medium text-[#7F4F61] mb-3 block">
                   Invite Residents
                 </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {elders.map((elder) => (
-                    <div
-                      key={elder.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        event.invitees.includes(elder.id)
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-purple-300'
-                      }`}
-                      onClick={() => toggleInvitee(elder.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900">{elder.name}</p>
-                          {elder.summary && (
-                            <p className="text-xs text-gray-600 mt-1">
-                              {elder.summary.short_summary}
-                            </p>
-                          )}
-                        </div>
-                        {event.invitees.includes(elder.id) && (
-                          <Badge className="bg-purple-600">Invited</Badge>
-                        )}
-                      </div>
+                
+                {/* Suggested Residents */}
+                {suggestedResidents.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs text-[#7F4F61]/70 mb-2">Suggested for this event:</p>
+                    <div className="space-y-2">
+                      {suggestedResidents.map((residentId) => {
+                        const resident = elders.find(e => e.id === residentId);
+                        if (!resident) return null;
+                        return (
+                          <div
+                            key={resident.id}
+                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                              event.invitees.includes(resident.id)
+                                ? 'border-[#7F4F61] bg-[#AFD0CD]/20'
+                                : 'border-[#C08777]/30 hover:border-[#C08777]'
+                            }`}
+                            onClick={() => toggleInvitee(resident.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-[#7F4F61]">{resident.name}</p>
+                                {resident.summary && (
+                                  <p className="text-xs text-[#7F4F61]/70 mt-1">
+                                    {resident.summary.short_summary}
+                                  </p>
+                                )}
+                              </div>
+                              {event.invitees.includes(resident.id) && (
+                                <Badge className="bg-[#C08777] text-white">Invited</Badge>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* All Residents Selection */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Select onValueChange={handleSelectResident}>
+                      <SelectTrigger className="w-full border-[#C08777]/30 focus:border-[#C08777]">
+                        <SelectValue placeholder="Select additional residents..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {elders
+                          .filter(elder => !event.invitees.includes(elder.id))
+                          .map((elder) => (
+                            <SelectItem 
+                              key={elder.id} 
+                              value={elder.id.toString()}
+                              className="text-[#7F4F61]"
+                            >
+                              {elder.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Selected Residents List */}
+                  {event.invitees.length > 0 && (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {event.invitees.map((residentId) => {
+                        const resident = elders.find(e => e.id === residentId);
+                        if (!resident) return null;
+                        return (
+                          <div
+                            key={resident.id}
+                            className="p-3 border border-[#7F4F61] rounded-lg bg-[#AFD0CD]/20"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-[#7F4F61]">{resident.name}</p>
+                                {resident.summary && (
+                                  <p className="text-xs text-[#7F4F61]/70 mt-1">
+                                    {resident.summary.short_summary}
+                                  </p>
+                                )}
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleInvitee(resident.id)}
+                                className="text-[#7F4F61] hover:text-[#7F4F61]/80 hover:bg-[#AFD0CD]/30"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
               <Button
                 onClick={saveEvent}
                 disabled={!event.title || !event.date}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                className="w-full bg-[#C08777] hover:bg-[#C08777]/90 text-white"
               >
                 <Save className="mr-2 h-4 w-4" />
                 {isEditing ? 'Update Event' : 'Save Event'}
