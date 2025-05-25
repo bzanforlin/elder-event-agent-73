@@ -3,11 +3,20 @@ import { getCSRFToken } from "./django";
 
 const API_BASE_URL = "/api";
 
+export interface ElderSummary {
+  id: number;
+  elder: number;
+  short_summary: string;
+  long_summary: string;
+  updated_at: string;
+}
+
 export interface Elder {
   id?: number;
   name: string;
   extra_details: string;
   created_at?: string;
+  summary?: ElderSummary | null;
 }
 
 export interface ElderAudio {
