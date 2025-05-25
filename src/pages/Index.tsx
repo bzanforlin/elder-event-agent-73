@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Users, FileText, Calendar, Plus, MessageCircle, Heart } from 'lucide-react';
@@ -36,21 +37,21 @@ const Index = () => {
           </Link>
 
           <Link to="/events/new">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#AFD0CD] hover:bg-[#AFD0CD]/90 text-[#7F4F61]">
+            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#7F4F61] hover:bg-[#7F4F61]/90 text-white">
               <Plus className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Plan activity</span>
             </Button>
           </Link>
 
           <Link to="/events">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#EFD492] hover:bg-[#EFD492]/90 text-[#7F4F61]">
+            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white">
               <Calendar className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Check calendar</span>
             </Button>
           </Link>
 
           <Link to="/elders">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#7F4F61] hover:bg-[#7F4F61]/90 text-white">
+            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white">
               <MessageCircle className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Brainstorm and ask questions</span>
             </Button>
