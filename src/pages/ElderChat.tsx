@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,39 +122,39 @@ She could even lead discussions given her extensive background with books and he
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 p-6">
+    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(to bottom right, #AFD0CD, #EFD492)' }}>
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-6">
+        <div className="mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate('/elders')}
-            className="mr-4 text-gray-600 hover:text-gray-800"
+            className="mb-4 text-[#7F4F61] hover:text-[#7F4F61]/80"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Elders
+            Back to Residents
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Chat about {elder.name}
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold text-[#7F4F61] mb-2">
+              Chat about {elder.name}
+            </h1>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Elder Summary Card */}
-          <Card className="bg-white shadow-lg lg:col-span-1">
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61] lg:col-span-1">
             <CardHeader>
-              <CardTitle className="flex items-center text-amber-800">
+              <CardTitle className="flex items-center text-[#7F4F61]">
                 <User className="mr-2 h-5 w-5" />
-                Elder Profile
+                {elder.name}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{elder.name}</h3>
                   {elder.summary && (
                     <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Summary:</p>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <p className="text-sm text-[#7F4F61]/70 leading-relaxed">
                         {elder.summary.short_summary}
                       </p>
                     </div>
@@ -166,17 +165,14 @@ She could even lead discussions given her extensive background with books and he
           </Card>
 
           {/* Chat Section */}
-          <Card className="bg-white shadow-lg lg:col-span-2">
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61] lg:col-span-2 flex flex-col">
             <CardHeader>
-              <CardTitle className="text-amber-800">
-                Activity Planning Assistant
+              <CardTitle className="text-[#7F4F61]">
+                Ask me what you'd like to know about {elder.name}
               </CardTitle>
-              <p className="text-sm text-gray-600">
-                Ask me about suitable activities for {elder.name}
-              </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <ScrollArea className="h-96 pr-4">
+            <CardContent className="flex flex-col flex-1 p-6 pt-0">
+              <ScrollArea className="flex-1 pr-4 mb-4">
                 <div className="space-y-4">
                   {chatMessages.map((message) => (
                     <div
@@ -186,8 +182,8 @@ She could even lead discussions given her extensive background with books and he
                       <div
                         className={`max-w-[85%] p-3 rounded-lg ${
                           message.sender === 'user'
-                            ? 'bg-amber-600 text-white'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-[#C08777] text-white'
+                            : 'bg-[#AFD0CD]/20 text-[#7F4F61]'
                         }`}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-line">
@@ -198,7 +194,7 @@ She could even lead discussions given her extensive background with books and he
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
+                      <div className="bg-[#AFD0CD]/20 text-[#7F4F61] p-3 rounded-lg">
                         <p className="text-sm">Thinking about {elder.name}...</p>
                       </div>
                     </div>
@@ -206,50 +202,21 @@ She could even lead discussions given her extensive background with books and he
                 </div>
               </ScrollArea>
 
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 mt-auto pt-4 border-t border-[#AFD0CD]/30">
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={`Ask about activities for ${elder.name}...`}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  className="border-[#C08777]/30 focus:border-[#C08777]"
                 />
                 <Button 
                   onClick={sendMessage} 
                   disabled={isLoading} 
-                  className="bg-amber-600 hover:bg-amber-700"
+                  className="bg-[#C08777] hover:bg-[#C08777]/90 text-white"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
-              </div>
-
-              <div className="border-t pt-4">
-                <p className="text-xs text-gray-500 mb-2">Quick suggestions:</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setNewMessage("What activities would be good for Margaret?")}
-                    className="text-xs"
-                  >
-                    Suggest activities
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setNewMessage("What music would Margaret enjoy?")}
-                    className="text-xs"
-                  >
-                    Music preferences
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setNewMessage("What books would interest Margaret?")}
-                    className="text-xs"
-                  >
-                    Reading interests
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
