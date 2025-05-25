@@ -1,37 +1,80 @@
-
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Users, FileText, Calendar, Plus, MessageCircle, Heart } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Users,
+  FileText,
+  Calendar,
+  Plus,
+  MessageCircle,
+  Heart,
+} from "lucide-react";
+import { elderApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [isNewElderOpen, setIsNewElderOpen] = useState(false);
-  const [newElderName, setNewElderName] = useState('');
-  const [newElderDetails, setNewElderDetails] = useState('');
+  const [newElderName, setNewElderName] = useState("");
+  const [newElderDetails, setNewElderDetails] = useState("");
   const [selectedAudioFile, setSelectedAudioFile] = useState<File | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const { toast } = useToast();
 
   const handleCreateElder = async () => {
     if (!newElderName.trim()) return;
 
-    // In real app, this would make API calls
-    console.log('Creating elder:', {
-      name: newElderName,
-      details: newElderDetails,
-      audioFile: selectedAudioFile
-    });
+    setIsCreating(true);
 
-    // Reset form and close dialog
-    setNewElderName('');
-    setNewElderDetails('');
-    setSelectedAudioFile(null);
-    setIsNewElderOpen(false);
+    try {
+      // Create the elder first
+      const newElder = await elderApi.create({
+        name: newElderName,
+        extra_details: newElderDetails,
+      });
+
+      // If there's an audio file, upload it
+      if (selectedAudioFile) {
+        await elderApi.uploadAudio(newElder.id!, selectedAudioFile);
+      }
+
+      toast({
+        title: "Success!",
+        description: `${newElderName} has been added successfully.`,
+      });
+
+      // Reset form and close dialog
+      setNewElderName("");
+      setNewElderDetails("");
+      setSelectedAudioFile(null);
+      setIsNewElderOpen(false);
+    } catch (error) {
+      console.error("Error creating elder:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create resident. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #AFD0CD, #EFD492)' }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: "linear-gradient(to bottom right, #AFD0CD, #EFD492)",
+      }}
+    >
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -50,14 +93,19 @@ const Index = () => {
         <div className="flex flex-wrap justify-center gap-6 mb-16">
           <Dialog open={isNewElderOpen} onOpenChange={setIsNewElderOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#7F4F61] hover:bg-[#7F4F61]/90 text-white">
+              <Button
+                size="lg"
+                className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#7F4F61] hover:bg-[#7F4F61]/90 text-white"
+              >
                 <Users className="h-8 w-8 mb-2" />
                 <span className="text-lg font-medium">Add new person</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle className="text-[#7F4F61]">Add New Elder</DialogTitle>
+                <DialogTitle className="text-[#7F4F61]">
+                  Add New Resident
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div>
@@ -70,7 +118,7 @@ const Index = () => {
                     placeholder="Enter elder's name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Additional Details
@@ -82,7 +130,7 @@ const Index = () => {
                     rows={3}
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Initial Audio Recording (Optional)
@@ -90,17 +138,27 @@ const Index = () => {
                   <input
                     type="file"
                     accept="audio/*"
-                    onChange={(e) => setSelectedAudioFile(e.target.files?.[0] || null)}
+                    onChange={(e) =>
+                      setSelectedAudioFile(e.target.files?.[0] || null)
+                    }
                     className="w-full p-2 border border-[#C08777]/30 rounded-md"
                   />
                 </div>
-                
+
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Button variant="outline" onClick={() => setIsNewElderOpen(false)} className="border-[#C08777]/30 text-[#7F4F61]">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsNewElderOpen(false)}
+                    className="border-[#C08777]/30 text-[#7F4F61]"
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={handleCreateElder} disabled={!newElderName.trim()} className="bg-[#C08777] hover:bg-[#C08777]/90 text-white">
-                    Create Elder Profile
+                  <Button
+                    onClick={handleCreateElder}
+                    disabled={!newElderName.trim() || isCreating}
+                    className="bg-[#C08777] hover:bg-[#C08777]/90 text-white"
+                  >
+                    {isCreating ? "Creating..." : "Create Elder Profile"}
                   </Button>
                 </div>
               </div>
@@ -108,30 +166,44 @@ const Index = () => {
           </Dialog>
 
           <Link to="/elders">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white">
+            <Button
+              size="lg"
+              className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white"
+            >
               <FileText className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Check registers</span>
             </Button>
           </Link>
 
           <Link to="/events/new">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#7F4F61] hover:bg-[#7F4F61]/90 text-white">
+            <Button
+              size="lg"
+              className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#7F4F61] hover:bg-[#7F4F61]/90 text-white"
+            >
               <Plus className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Plan activity</span>
             </Button>
           </Link>
 
           <Link to="/events">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white">
+            <Button
+              size="lg"
+              className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white"
+            >
               <Calendar className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Check calendar</span>
             </Button>
           </Link>
 
           <Link to="/elders">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#8BB8B3] hover:bg-[#8BB8B3]/90 text-[#7F4F61]">
+            <Button
+              size="lg"
+              className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#8BB8B3] hover:bg-[#8BB8B3]/90 text-[#7F4F61]"
+            >
               <MessageCircle className="h-8 w-8 mb-2" />
-              <span className="text-lg font-medium">Brainstorm and ask questions</span>
+              <span className="text-lg font-medium">
+                Brainstorm and ask questions
+              </span>
             </Button>
           </Link>
         </div>
@@ -139,7 +211,8 @@ const Index = () => {
         {/* Footer */}
         <div className="text-center mt-16 pt-8 border-t border-[#7F4F61]/20">
           <p className="text-[#7F4F61]">
-            ResidentLines - Bringing meaningful connections to assisted living communities
+            ResidentLines - Bringing meaningful connections to assisted living
+            communities
           </p>
         </div>
       </div>
