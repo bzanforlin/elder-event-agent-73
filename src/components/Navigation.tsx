@@ -1,16 +1,14 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, Heart, Menu, X } from 'lucide-react';
+import { Heart, Menu, X } from 'lucide-react';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  const navItems = [
-    { path: '/elders', label: 'Elders', icon: Users },
-    { path: '/events', label: 'Events', icon: Calendar },
-  ];
+  const navItems: any[] = [];
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 

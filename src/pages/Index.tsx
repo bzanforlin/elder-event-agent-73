@@ -1,5 +1,4 @@
 
-
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Users, FileText, Calendar, Plus, MessageCircle, Heart } from 'lucide-react';
@@ -52,7 +51,7 @@ const Index = () => {
           </Link>
 
           <Link to="/elders">
-            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#AFD0CD] hover:bg-[#AFD0CD]/90 text-[#7F4F61]">
+            <Button size="lg" className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#8BB8B3] hover:bg-[#8BB8B3]/90 text-[#7F4F61]">
               <MessageCircle className="h-8 w-8 mb-2" />
               <span className="text-lg font-medium">Brainstorm and ask questions</span>
             </Button>
@@ -71,4 +70,3 @@ const Index = () => {
 };
 
 export default Index;
-
