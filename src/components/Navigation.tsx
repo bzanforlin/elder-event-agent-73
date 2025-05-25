@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Calendar, Heart, Menu, X } from 'lucide-react';
 
@@ -19,13 +18,13 @@ const Navigation = () => {
   return (
     <>
       {/* Desktop Navigation */}
-      <Card className="hidden md:block fixed top-6 left-6 right-6 z-50 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-        <div className="flex items-center justify-between p-4">
+      <div className="hidden md:block bg-[#7F4F61] shadow-lg">
+        <div className="max-w-6xl mx-auto flex items-center justify-between p-4">
           <Link to="/" className="flex items-center space-x-2">
-            <Heart className="h-8 w-8 text-blue-600" />
+            <Heart className="h-8 w-8 text-[#EFD492]" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">CareEvents</h1>
-              <p className="text-xs text-gray-600">Assisted Living Event Planning</p>
+              <h1 className="text-xl font-bold text-white">CareEvents</h1>
+              <p className="text-xs text-[#AFD0CD]">Assisted Living Event Planning</p>
             </div>
           </Link>
 
@@ -38,8 +37,8 @@ const Navigation = () => {
                     variant={isActive(item.path) ? "default" : "ghost"}
                     className={`flex items-center space-x-2 ${
                       isActive(item.path)
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-600 hover:text-gray-900"
+                        ? "bg-[#C08777] text-white hover:bg-[#C08777]/90"
+                        : "text-[#AFD0CD] hover:text-white hover:bg-[#C08777]/20"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -50,27 +49,28 @@ const Navigation = () => {
             })}
           </nav>
         </div>
-      </Card>
+      </div>
 
       {/* Mobile Navigation */}
-      <Card className="md:hidden fixed top-4 left-4 right-4 z-50 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
+      <div className="md:hidden bg-[#7F4F61] shadow-lg">
         <div className="flex items-center justify-between p-4">
           <Link to="/" className="flex items-center space-x-2">
-            <Heart className="h-6 w-6 text-blue-600" />
-            <span className="text-lg font-bold text-gray-900">CareEvents</span>
+            <Heart className="h-6 w-6 text-[#EFD492]" />
+            <span className="text-lg font-bold text-white">CareEvents</span>
           </Link>
 
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-[#AFD0CD] hover:text-white hover:bg-[#C08777]/20"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
 
         {isMobileMenuOpen && (
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-[#C08777] p-4">
             <nav className="space-y-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -84,8 +84,8 @@ const Navigation = () => {
                       variant={isActive(item.path) ? "default" : "ghost"}
                       className={`w-full justify-start ${
                         isActive(item.path)
-                          ? "bg-blue-600 text-white"
-                          : "text-gray-600 hover:text-gray-900"
+                          ? "bg-[#C08777] text-white hover:bg-[#C08777]/90"
+                          : "text-[#AFD0CD] hover:text-white hover:bg-[#C08777]/20"
                       }`}
                     >
                       <Icon className="h-4 w-4 mr-2" />
@@ -97,10 +97,7 @@ const Navigation = () => {
             </nav>
           </div>
         )}
-      </Card>
-
-      {/* Spacer for fixed navigation */}
-      <div className="h-20 md:h-24"></div>
+      </div>
     </>
   );
 };

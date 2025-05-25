@@ -108,15 +108,15 @@ const Events = () => {
   const sortedEvents = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
+    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(to bottom right, #AFD0CD, #EFD492)' }}>
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Upcoming Events</h1>
-            <p className="text-gray-600">Plan and manage activities for your residents</p>
+            <h1 className="text-3xl font-bold text-[#7F4F61] mb-2">Upcoming Events</h1>
+            <p className="text-[#7F4F61]">Plan and manage activities for your residents</p>
           </div>
           
-          <Button onClick={handleCreateEvent} className="bg-green-600 hover:bg-green-700 text-white">
+          <Button onClick={handleCreateEvent} className="bg-[#C08777] hover:bg-[#C08777]/90 text-white">
             <Plus className="mr-2 h-4 w-4" />
             Plan New Event
           </Button>
@@ -124,18 +124,18 @@ const Events = () => {
 
         <div className="space-y-4">
           {sortedEvents.map((event) => (
-            <Card key={event.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-green-500">
+            <Card key={event.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61]">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-xl text-gray-900 mb-2">{event.title}</CardTitle>
-                    <p className="text-gray-600 text-sm leading-relaxed">{event.description}</p>
+                    <CardTitle className="text-xl text-[#7F4F61] mb-2">{event.title}</CardTitle>
+                    <p className="text-[#7F4F61]/70 text-sm leading-relaxed">{event.description}</p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditEvent(event.id)}
-                    className="text-green-600 border-green-200 hover:bg-green-50"
+                    className="text-[#C08777] border-[#C08777]/30 hover:bg-[#C08777]/10"
                   >
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
@@ -144,31 +144,31 @@ const Events = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="flex items-center text-gray-700">
-                    <Calendar className="h-4 w-4 mr-2 text-green-600" />
+                  <div className="flex items-center text-[#7F4F61]">
+                    <Calendar className="h-4 w-4 mr-2 text-[#C08777]" />
                     <div>
                       <p className="font-medium">{formatDate(event.date)}</p>
-                      <p className="text-sm text-gray-500">{formatTime(event.date)}</p>
+                      <p className="text-sm text-[#7F4F61]/70">{formatTime(event.date)}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center text-gray-700">
-                    <Clock className="h-4 w-4 mr-2 text-green-600" />
+                  <div className="flex items-center text-[#7F4F61]">
+                    <Clock className="h-4 w-4 mr-2 text-[#C08777]" />
                     <span>{formatDuration(event.duration_minutes)}</span>
                   </div>
                   
-                  <div className="flex items-center text-gray-700">
-                    <Users className="h-4 w-4 mr-2 text-green-600" />
+                  <div className="flex items-center text-[#7F4F61]">
+                    <Users className="h-4 w-4 mr-2 text-[#C08777]" />
                     <span>{event.invitees.length} invited</span>
                   </div>
                 </div>
                 
                 {event.invitees.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Invited Residents:</p>
+                    <p className="text-sm font-medium text-[#7F4F61] mb-2">Invited Residents:</p>
                     <div className="flex flex-wrap gap-2">
                       {event.invitees.map((invitee) => (
-                        <Badge key={invitee.id} variant="secondary" className="bg-green-100 text-green-800">
+                        <Badge key={invitee.id} variant="secondary" className="bg-[#AFD0CD] text-[#7F4F61]">
                           {invitee.name}
                         </Badge>
                       ))}
@@ -182,10 +182,10 @@ const Events = () => {
           {sortedEvents.length === 0 && (
             <Card className="bg-white shadow-lg text-center py-12">
               <CardContent>
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No events scheduled</h3>
-                <p className="text-gray-600 mb-4">Start planning your first event for the residents</p>
-                <Button onClick={handleCreateEvent} className="bg-green-600 hover:bg-green-700 text-white">
+                <Calendar className="h-12 w-12 text-[#C08777] mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-[#7F4F61] mb-2">No events scheduled</h3>
+                <p className="text-[#7F4F61]/70 mb-4">Start planning your first event for the residents</p>
+                <Button onClick={handleCreateEvent} className="bg-[#C08777] hover:bg-[#C08777]/90 text-white">
                   <Plus className="mr-2 h-4 w-4" />
                   Plan Your First Event
                 </Button>

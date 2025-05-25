@@ -77,28 +77,28 @@ const Elders = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(to bottom right, #AFD0CD, #EFD492)' }}>
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Elder Profiles</h1>
-            <p className="text-gray-600">Manage elder information and preferences</p>
+            <h1 className="text-3xl font-bold text-[#7F4F61] mb-2">Elder Profiles</h1>
+            <p className="text-[#7F4F61]">Manage elder information and preferences</p>
           </div>
           
           <Dialog open={isNewElderOpen} onOpenChange={setIsNewElderOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button className="bg-[#C08777] hover:bg-[#C08777]/90 text-white">
                 <Plus className="mr-2 h-4 w-4" />
                 Add New Elder
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Add New Elder</DialogTitle>
+                <DialogTitle className="text-[#7F4F61]">Add New Elder</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Name *
                   </label>
                   <Input
@@ -109,7 +109,7 @@ const Elders = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Additional Details
                   </label>
                   <Textarea
@@ -121,22 +121,22 @@ const Elders = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label className="text-sm font-medium text-[#7F4F61] mb-2 block">
                     Initial Audio Recording (Optional)
                   </label>
                   <input
                     type="file"
                     accept="audio/*"
                     onChange={(e) => setSelectedAudioFile(e.target.files?.[0] || null)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-2 border border-[#C08777]/30 rounded-md"
                   />
                 </div>
                 
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Button variant="outline" onClick={() => setIsNewElderOpen(false)}>
+                  <Button variant="outline" onClick={() => setIsNewElderOpen(false)} className="border-[#C08777]/30 text-[#7F4F61]">
                     Cancel
                   </Button>
-                  <Button onClick={handleCreateElder} disabled={!newElderName.trim()}>
+                  <Button onClick={handleCreateElder} disabled={!newElderName.trim()} className="bg-[#C08777] hover:bg-[#C08777]/90 text-white">
                     Create Elder Profile
                   </Button>
                 </div>
@@ -147,15 +147,15 @@ const Elders = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {elders.map((elder) => (
-            <Card key={elder.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-blue-500">
+            <Card key={elder.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61]">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-gray-900 flex items-center justify-between">
+                <CardTitle className="text-lg text-[#7F4F61] flex items-center justify-between">
                   {elder.name}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleChatWithElder(elder.id)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-[#C08777] hover:text-[#7F4F61] hover:bg-[#AFD0CD]/30"
                   >
                     <MessageCircle className="h-4 w-4" />
                   </Button>
@@ -164,8 +164,8 @@ const Elders = () => {
               <CardContent>
                 {elder.summary && (
                   <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-2 font-medium">Summary:</p>
-                    <p className="text-sm text-gray-800 leading-relaxed">
+                    <p className="text-sm text-[#7F4F61] mb-2 font-medium">Summary:</p>
+                    <p className="text-sm text-[#7F4F61]/80 leading-relaxed">
                       {elder.summary.short_summary}
                     </p>
                   </div>
@@ -173,16 +173,16 @@ const Elders = () => {
                 
                 {elder.extra_details && (
                   <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-1 font-medium">Details:</p>
-                    <p className="text-sm text-gray-700">{elder.extra_details}</p>
+                    <p className="text-sm text-[#7F4F61] mb-1 font-medium">Details:</p>
+                    <p className="text-sm text-[#7F4F61]/70">{elder.extra_details}</p>
                   </div>
                 )}
                 
-                <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                  <span className="text-xs text-gray-500">
+                <div className="flex justify-between items-center pt-3 border-t border-[#AFD0CD]/30">
+                  <span className="text-xs text-[#7F4F61]/60">
                     Added {new Date(elder.created_at).toLocaleDateString()}
                   </span>
-                  <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                  <Button variant="outline" size="sm" className="text-[#C08777] border-[#C08777]/30 hover:bg-[#C08777]/10">
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
                   </Button>
