@@ -22,15 +22,15 @@ import {
   ArrowLeft,
   Plus,
 } from "lucide-react";
-import { elderApi, eventApi, Elder, Event } from "@/lib/api";
+import {
+  elderApi,
+  eventApi,
+  chatApi,
+  Elder,
+  Event,
+  ChatMessage,
+} from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-
-interface ChatMessage {
-  id: number;
-  sender: "user" | "llm";
-  message: string;
-  timestamp: string;
-}
 
 interface EventForm {
   title: string;
@@ -61,6 +61,7 @@ const EventPlanning = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [suggestedResidents, setSuggestedResidents] = useState<number[]>([]);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
 
   // Load data from API
   useEffect(() => {
@@ -88,15 +89,35 @@ const EventPlanning = () => {
             invitees: eventData.invitees?.map((inv) => inv.elder) || [],
           });
 
-          // Initialize with some chat context for editing
-          setChatMessages([
-            {
-              id: 1,
-              sender: "llm",
-              message: `I can see you're editing the event "${eventData.title}". I'm here to help you make any adjustments or improvements. What would you like to change about this event?`,
-              timestamp: new Date().toISOString(),
-            },
-          ]);
+          // Load existing chat messages
+          try {
+            const messages = await chatApi.getEventMessages(parseInt(eventId));
+            if (messages.length > 0) {
+              setChatMessages(messages);
+              setLastMessageCount(messages.length);
+            } else {
+              // Initialize with welcome message if no chat history
+              setChatMessages([
+                {
+                  id: 1,
+                  sender: "llm",
+                  message: `I can see you're editing the event "${eventData.title}". I'm here to help you make any adjustments or improvements. What would you like to change about this event?`,
+                  timestamp: new Date().toISOString(),
+                },
+              ]);
+            }
+          } catch (error) {
+            console.error("Error loading chat messages:", error);
+            // Fallback to welcome message
+            setChatMessages([
+              {
+                id: 1,
+                sender: "llm",
+                message: `I can see you're editing the event "${eventData.title}". I'm here to help you make any adjustments or improvements. What would you like to change about this event?`,
+                timestamp: new Date().toISOString(),
+              },
+            ]);
+          }
         } else {
           // Initialize chat for new event
           setChatMessages([
@@ -124,33 +145,82 @@ const EventPlanning = () => {
     loadData();
   }, [isEditing, eventId, toast]);
 
+  // Polling for new messages (only for existing events)
+  useEffect(() => {
+    if (!isEditing || !eventId) return;
+
+    const pollForMessages = async () => {
+      try {
+        const messages = await chatApi.getEventMessages(parseInt(eventId));
+        if (messages.length > lastMessageCount) {
+          setChatMessages(messages);
+          setLastMessageCount(messages.length);
+        }
+      } catch (error) {
+        console.error("Error polling for messages:", error);
+      }
+    };
+
+    const interval = setInterval(pollForMessages, 3000); // Poll every 3 seconds
+    return () => clearInterval(interval);
+  }, [isEditing, eventId, lastMessageCount]);
+
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    const userMessage: ChatMessage = {
-      id: Date.now(),
-      sender: "user",
-      message: newMessage,
-      timestamp: new Date().toISOString(),
-    };
+    const messageText = newMessage;
+    setNewMessage(""); // Clear input immediately
 
-    setChatMessages((prev) => [...prev, userMessage]);
-    setNewMessage("");
-    setIsLoading(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage: ChatMessage = {
-        id: Date.now() + 1,
-        sender: "llm",
-        message:
-          "Based on the preferences of your residents, I suggest organizing an activity that combines their interests. For example, if you're planning a music event, Margaret would enjoy classical pieces while Eleanor would love the social aspect. Would you like me to help you set the date and select specific invitees for this event?",
+    // For new events, we can't send real messages yet, so use mock behavior
+    if (!isEditing || !eventId) {
+      const userMessage: ChatMessage = {
+        id: Date.now(),
+        sender: "user",
+        message: messageText,
         timestamp: new Date().toISOString(),
       };
 
-      setChatMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
-    }, 1500);
+      setChatMessages((prev) => [...prev, userMessage]);
+
+      // Simulate AI response for new events
+      setTimeout(() => {
+        const aiMessage: ChatMessage = {
+          id: Date.now() + 1,
+          sender: "llm",
+          message:
+            "Based on the preferences of your residents, I suggest organizing an activity that combines their interests. For example, if you're planning a music event, Margaret would enjoy classical pieces while Eleanor would love the social aspect. Would you like me to help you set the date and select specific invitees for this event?",
+          timestamp: new Date().toISOString(),
+        };
+
+        setChatMessages((prev) => [...prev, aiMessage]);
+      }, 1500);
+      return;
+    }
+
+    // For existing events, use real API
+    try {
+      const userMessage = await chatApi.sendEventMessage(
+        parseInt(eventId),
+        messageText,
+        "user"
+      );
+
+      // Add the user message immediately
+      setChatMessages((prev) => [...prev, userMessage]);
+      setLastMessageCount((prev) => prev + 1);
+
+      // The AI response will be generated automatically by the backend
+      // and picked up by our polling mechanism
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      // Restore the message text if there was an error
+      setNewMessage(messageText);
+    }
   };
 
   const toggleInvitee = (elderId: number) => {
@@ -218,6 +288,19 @@ const EventPlanning = () => {
           title: "Success!",
           description: "Event created successfully.",
         });
+
+        // Send initial welcome message to the new event's chat
+        if (newEvent.id) {
+          try {
+            await chatApi.sendEventMessage(
+              newEvent.id,
+              "Hello! I'm here to help you plan the perfect event for your residents. I have access to information about each elder's preferences and history. What kind of event are you thinking about organizing?",
+              "llm"
+            );
+          } catch (error) {
+            console.error("Error sending initial chat message:", error);
+          }
+        }
       }
 
       navigate("/events");
@@ -269,9 +352,27 @@ const EventPlanning = () => {
             {/* Chat Section */}
             <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61] flex flex-col">
               <CardHeader>
-                <CardTitle className="flex items-center text-[#7F4F61]">
-                  <Users className="mr-2 h-5 w-5" />
-                  AI Event Planner
+                <CardTitle className="flex items-center justify-between text-[#7F4F61]">
+                  <div className="flex items-center">
+                    <Users className="mr-2 h-5 w-5" />
+                    AI Event Planner
+                  </div>
+                  {isEditing && eventId && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-100 text-green-800"
+                    >
+                      Live Chat
+                    </Badge>
+                  )}
+                  {(!isEditing || !eventId) && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-yellow-100 text-yellow-800"
+                    >
+                      Preview Mode
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col flex-1 p-6 pt-0">
@@ -297,13 +398,6 @@ const EventPlanning = () => {
                         </div>
                       </div>
                     ))}
-                    {isLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-[#AFD0CD]/20 text-[#7F4F61] p-3 rounded-lg">
-                          <p className="text-sm">AI is thinking...</p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </ScrollArea>
 
@@ -311,13 +405,16 @@ const EventPlanning = () => {
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Ask about event planning..."
+                    placeholder={
+                      isEditing && eventId
+                        ? "Ask about event planning..."
+                        : "Ask about event planning (preview mode)..."
+                    }
                     onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                     className="border-[#C08777]/30 focus:border-[#C08777]"
                   />
                   <Button
                     onClick={sendMessage}
-                    disabled={isLoading}
                     className="bg-[#C08777] hover:bg-[#C08777]/90 text-white"
                   >
                     <Send className="h-4 w-4" />

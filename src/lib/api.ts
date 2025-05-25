@@ -44,6 +44,13 @@ export interface Event {
   invitees?: EventInvitee[];
 }
 
+export interface ChatMessage {
+  id: number;
+  sender: "user" | "llm";
+  message: string;
+  timestamp: string;
+}
+
 // Elder API functions
 export const elderApi = {
   // Create a new elder
@@ -241,5 +248,92 @@ export const eventApi = {
     if (!response.ok) {
       throw new Error(`Failed to remove invitee: ${response.statusText}`);
     }
+  },
+};
+
+// Chat API functions
+export const chatApi = {
+  // Get event chat messages
+  getEventMessages: async (eventId: number): Promise<ChatMessage[]> => {
+    const response = await fetch(
+      `${API_BASE_URL}/events/${eventId}/chat/messages/`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch chat messages: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Send event chat message
+  sendEventMessage: async (
+    eventId: number,
+    message: string,
+    sender: "user" | "llm" = "user"
+  ): Promise<ChatMessage> => {
+    const csrfToken = getCSRFToken();
+    const response = await fetch(
+      `${API_BASE_URL}/events/${eventId}/chat/messages/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
+        body: JSON.stringify({
+          message,
+          sender,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to send message: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Get elder chat messages
+  getElderMessages: async (elderId: number): Promise<ChatMessage[]> => {
+    const response = await fetch(
+      `${API_BASE_URL}/elders/${elderId}/chat/messages/`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch chat messages: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Send elder chat message
+  sendElderMessage: async (
+    elderId: number,
+    message: string,
+    sender: "user" | "llm" = "user"
+  ): Promise<ChatMessage> => {
+    const csrfToken = getCSRFToken();
+    const response = await fetch(
+      `${API_BASE_URL}/elders/${elderId}/chat/messages/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
+        body: JSON.stringify({
+          message,
+          sender,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to send message: ${response.statusText}`);
+    }
+
+    return response.json();
   },
 };
