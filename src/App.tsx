@@ -23,43 +23,61 @@ const App = () => (
         <div className="min-h-screen bg-gray-50">
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/dashboard" element={
-              <>
-                <Navigation />
-                <Index />
-              </>
-            } />
-            <Route path="/elders" element={
-              <>
-                <Navigation />
-                <Elders />
-              </>
-            } />
-            <Route path="/elders/:elderId/chat" element={
-              <>
-                <Navigation />
-                <ElderChat />
-              </>
-            } />
-            <Route path="/events" element={
-              <>
-                <Navigation />
-                <Events />
-              </>
-            } />
-            <Route path="/events/new" element={
-              <>
-                <Navigation />
-                <EventPlanning />
-              </>
-            } />
-            <Route path="/events/:eventId/edit" element={
-              <>
-                <Navigation />
-                <EventPlanning />
-              </>
-            } />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/dashboard"
+              element={
+                <>
+                  <Navigation />
+                  <Index />
+                </>
+              }
+            />
+            <Route
+              path="/elders"
+              element={
+                <>
+                  <Navigation />
+                  <Elders />
+                </>
+              }
+            />
+            <Route
+              path="/elders/:elderId/chat"
+              element={
+                <>
+                  <Navigation />
+                  <ElderChat />
+                </>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <>
+                  <Navigation />
+                  <Events />
+                </>
+              }
+            />
+            <Route
+              path="/events/new"
+              element={
+                <>
+                  <Navigation />
+                  <EventPlanning />
+                </>
+              }
+            />
+            <Route
+              path="/events/:eventId/edit"
+              element={
+                <>
+                  <Navigation />
+                  <EventPlanning />
+                </>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

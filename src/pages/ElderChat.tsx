@@ -1,133 +1,157 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, ArrowLeft, User } from 'lucide-react';
-
-interface Elder {
-  id: number;
-  name: string;
-  summary?: {
-    short_summary: string;
-    long_summary: string;
-  };
-}
-
-interface ChatMessage {
-  id: number;
-  sender: 'user' | 'llm';
-  message: string;
-  timestamp: string;
-}
+import { Send, ArrowLeft, User } from "lucide-react";
+import { elderApi, chatApi, Elder, ChatMessage } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const ElderChat = () => {
   const { elderId } = useParams();
   const navigate = useNavigate();
-  
+  const { toast } = useToast();
+
   const [elder, setElder] = useState<Elder | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // Fetch elder data and chat messages
   useEffect(() => {
-    // Mock data - in real app, fetch from API
-    const mockElder: Elder = {
-      id: parseInt(elderId || '1'),
-      name: "Margaret Thompson",
-      summary: {
-        short_summary: "Margaret enjoys quiet activities like reading and listening to classical music. She has mobility limitations but is very social.",
-        long_summary: "Margaret Thompson is a retired librarian who spent 40 years working at the local public library. She has a deep love for mystery novels, particularly Agatha Christie, and enjoys classical music, especially Beethoven and Mozart. She has some mobility issues but remains mentally sharp and enjoys social interaction. She often shares stories about her library work and the many people she helped over the years."
+    const fetchData = async () => {
+      if (!elderId) return;
+
+      try {
+        setIsInitialLoading(true);
+
+        // Fetch elder details
+        const elderData = await elderApi.get(parseInt(elderId));
+        setElder(elderData);
+
+        // Fetch existing chat messages
+        const messages = await chatApi.getElderMessages(parseInt(elderId));
+        setChatMessages(messages);
+
+        // If no messages exist, send an initial greeting
+        if (messages.length === 0) {
+          const initialMessage = `Hello! I'm here to help you plan activities for ${elderData.name}. I have detailed information about their preferences and background. What would you like to know or plan for them?`;
+
+          await chatApi.sendElderMessage(
+            parseInt(elderId),
+            initialMessage,
+            "llm"
+          );
+
+          // Refresh messages to include the initial greeting
+          const updatedMessages = await chatApi.getElderMessages(
+            parseInt(elderId)
+          );
+          setChatMessages(updatedMessages);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load elder information. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsInitialLoading(false);
       }
     };
-    
-    setElder(mockElder);
-    
-    // Mock initial chat messages
-    setChatMessages([
-      {
-        id: 1,
-        sender: 'llm',
-        message: `Hello! I'm here to help you plan activities for ${mockElder.name}. I have detailed information about her preferences and background. What would you like to know or plan for her?`,
-        timestamp: new Date().toISOString()
+
+    fetchData();
+  }, [elderId, toast]);
+
+  // Poll for new messages (to catch AI responses)
+  useEffect(() => {
+    if (!elderId || isInitialLoading) return;
+
+    const pollMessages = async () => {
+      try {
+        const messages = await chatApi.getElderMessages(parseInt(elderId));
+        setChatMessages(messages);
+      } catch (error) {
+        console.error("Error polling messages:", error);
       }
-    ]);
-  }, [elderId]);
+    };
+
+    // Poll every 2 seconds for new messages
+    const interval = setInterval(pollMessages, 2000);
+
+    return () => clearInterval(interval);
+  }, [elderId, isInitialLoading]);
 
   const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !elderId) return;
 
-    const userMessage: ChatMessage = {
-      id: Date.now(),
-      sender: 'user',
-      message: newMessage,
-      timestamp: new Date().toISOString()
-    };
+    try {
+      setIsLoading(true);
 
-    setChatMessages(prev => [...prev, userMessage]);
-    setNewMessage('');
-    setIsLoading(true);
+      // Send user message
+      await chatApi.sendElderMessage(parseInt(elderId), newMessage, "user");
 
-    // Simulate AI response based on elder's preferences
-    setTimeout(() => {
-      let aiResponse = '';
-      
-      if (newMessage.toLowerCase().includes('activity') || newMessage.toLowerCase().includes('activities')) {
-        aiResponse = `Based on Margaret's profile, I recommend activities that combine her love for literature and classical music. She would enjoy:
+      // Clear input
+      setNewMessage("");
 
-• A classical music listening session with Beethoven or Mozart
-• A mystery book discussion group
-• Quiet reading time in a comfortable setting
-• Storytelling sessions where she can share her library experiences
+      // Refresh messages immediately to show user message
+      const updatedMessages = await chatApi.getElderMessages(parseInt(elderId));
+      setChatMessages(updatedMessages);
 
-Given her mobility limitations, seated activities work best. She's very social, so group activities where she can interact with others would be ideal.`;
-      } else if (newMessage.toLowerCase().includes('music')) {
-        aiResponse = `Margaret has a particular love for classical music, especially Beethoven and Mozart. She would enjoy:
-
-• Classical music concerts or listening sessions
-• Musical discussions about her favorite composers
-• Light musical activities that don't require mobility
-• Group singing of familiar classical pieces
-
-Her background as a librarian means she might also appreciate learning about the history and stories behind the compositions.`;
-      } else if (newMessage.toLowerCase().includes('book') || newMessage.toLowerCase().includes('read')) {
-        aiResponse = `Margaret's passion for mystery novels, especially Agatha Christie, makes her perfect for:
-
-• Mystery book club discussions
-• Reading aloud sessions
-• Audiobook listening groups
-• Literary trivia games
-• Sharing stories about her favorite books from her library career
-
-She could even lead discussions given her extensive background with books and helping library patrons.`;
-      } else {
-        aiResponse = `Based on Margaret's profile as a former librarian who loves mystery novels and classical music, I can suggest personalized activities for her. She's socially engaged despite mobility limitations. What specific type of activity or event are you thinking about? I can provide detailed recommendations tailored to her interests and abilities.`;
-      }
-
-      const aiMessage: ChatMessage = {
-        id: Date.now() + 1,
-        sender: 'llm',
-        message: aiResponse,
-        timestamp: new Date().toISOString()
-      };
-
-      setChatMessages(prev => [...prev, aiMessage]);
+      // Note: AI response will be handled by the polling mechanism
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
+  if (isInitialLoading) {
+    return (
+      <div
+        className="min-h-screen p-6 flex items-center justify-center"
+        style={{
+          background: "linear-gradient(to bottom right, #AFD0CD, #EFD492)",
+        }}
+      >
+        <div className="text-[#7F4F61] text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   if (!elder) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className="min-h-screen p-6 flex items-center justify-center"
+        style={{
+          background: "linear-gradient(to bottom right, #AFD0CD, #EFD492)",
+        }}
+      >
+        <div className="text-[#7F4F61] text-lg">Elder not found</div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(to bottom right, #AFD0CD, #EFD492)' }}>
+    <div
+      className="min-h-screen p-6"
+      style={{
+        background: "linear-gradient(to bottom right, #AFD0CD, #EFD492)",
+      }}
+    >
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => navigate('/elders')}
+            onClick={() => navigate("/elders")}
             className="mb-4 text-[#7F4F61] hover:text-[#7F4F61]/80"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -152,10 +176,23 @@ She could even lead discussions given her extensive background with books and he
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  {elder.summary && (
+                  {elder.summary ? (
                     <div>
                       <p className="text-sm text-[#7F4F61]/70 leading-relaxed">
                         {elder.summary.short_summary}
+                      </p>
+                    </div>
+                  ) : elder.extra_details ? (
+                    <div>
+                      <p className="text-sm text-[#7F4F61]/70 leading-relaxed">
+                        {elder.extra_details}
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm text-[#7F4F61]/70 leading-relaxed">
+                        No summary available yet. Upload audio files to generate
+                        a detailed summary.
                       </p>
                     </div>
                   )}
@@ -177,17 +214,24 @@ She could even lead discussions given her extensive background with books and he
                   {chatMessages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${
+                        message.sender === "user"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
                     >
                       <div
                         className={`max-w-[85%] p-3 rounded-lg ${
-                          message.sender === 'user'
-                            ? 'bg-[#C08777] text-white'
-                            : 'bg-[#AFD0CD]/20 text-[#7F4F61]'
+                          message.sender === "user"
+                            ? "bg-[#C08777] text-white"
+                            : "bg-[#AFD0CD]/20 text-[#7F4F61]"
                         }`}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-line">
                           {message.message}
+                        </p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {new Date(message.timestamp).toLocaleTimeString()}
                         </p>
                       </div>
                     </div>
@@ -195,7 +239,9 @@ She could even lead discussions given her extensive background with books and he
                   {isLoading && (
                     <div className="flex justify-start">
                       <div className="bg-[#AFD0CD]/20 text-[#7F4F61] p-3 rounded-lg">
-                        <p className="text-sm">Thinking about {elder.name}...</p>
+                        <p className="text-sm">
+                          Thinking about {elder.name}...
+                        </p>
                       </div>
                     </div>
                   )}
@@ -207,12 +253,13 @@ She could even lead discussions given her extensive background with books and he
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={`Ask about activities for ${elder.name}...`}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                   className="border-[#C08777]/30 focus:border-[#C08777]"
+                  disabled={isLoading}
                 />
-                <Button 
-                  onClick={sendMessage} 
-                  disabled={isLoading} 
+                <Button
+                  onClick={sendMessage}
+                  disabled={isLoading || !newMessage.trim()}
                   className="bg-[#C08777] hover:bg-[#C08777]/90 text-white"
                 >
                   <Send className="h-4 w-4" />

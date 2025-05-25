@@ -171,7 +171,7 @@ const Index = () => {
               className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#C08777] hover:bg-[#C08777]/90 text-white"
             >
               <FileText className="h-8 w-8 mb-2" />
-              <span className="text-lg font-medium">Check registers</span>
+              <span className="text-lg font-medium">Current Residents</span>
             </Button>
           </Link>
 
@@ -195,7 +195,7 @@ const Index = () => {
             </Button>
           </Link>
 
-          <Link to="/elders">
+          {/* <Link to="/elders">
             <Button
               size="lg"
               className="flex flex-col items-center p-8 h-auto min-w-[160px] bg-[#8BB8B3] hover:bg-[#8BB8B3]/90 text-[#7F4F61]"
@@ -205,7 +205,7 @@ const Index = () => {
                 Brainstorm and ask questions
               </span>
             </Button>
-          </Link>
+          </Link> */}
         </div>
 
         {/* Footer */}
