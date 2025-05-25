@@ -406,8 +406,8 @@ const EventPlanning = () => {
                 </CardTitle>
                 {isEditing && eventId && (
                   <p className="text-xs text-[#7F4F61]/70 mt-1">
-                    💡 I can help you add or remove residents from the
-                    invitation list. Just ask!
+                    💡 I can help you manage invitations and find residents by
+                    interests (e.g., "find residents who like music"). Just ask!
                   </p>
                 )}
               </CardHeader>
