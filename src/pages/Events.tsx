@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -112,7 +111,7 @@ const Events = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#7F4F61] mb-2">Upcoming Events</h1>
+            <h1 className="text-3xl font-bold text-[#7F4F61] mb-2">Calendar of Events</h1>
             <p className="text-[#7F4F61]">Plan and manage activities for your residents</p>
           </div>
           
@@ -122,7 +121,7 @@ const Events = () => {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {sortedEvents.map((event) => (
             <Card key={event.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61]">
               <CardHeader className="pb-4">
@@ -143,7 +142,7 @@ const Events = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="flex items-center gap-6 mb-4">
                   <div className="flex items-center text-[#7F4F61]">
                     <Calendar className="h-4 w-4 mr-2 text-[#C08777]" />
                     <div>
@@ -152,14 +151,16 @@ const Events = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center text-[#7F4F61]">
-                    <Clock className="h-4 w-4 mr-2 text-[#C08777]" />
-                    <span>{formatDuration(event.duration_minutes)}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-[#7F4F61]">
-                    <Users className="h-4 w-4 mr-2 text-[#C08777]" />
-                    <span>{event.invitees.length} invited</span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center text-[#7F4F61]">
+                      <Clock className="h-4 w-4 mr-2 text-[#C08777]" />
+                      <span>{formatDuration(event.duration_minutes)}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-[#7F4F61]">
+                      <Users className="h-4 w-4 mr-2 text-[#C08777]" />
+                      <span>{event.invitees.length} invited</span>
+                    </div>
                   </div>
                 </div>
                 
@@ -180,7 +181,7 @@ const Events = () => {
           ))}
           
           {sortedEvents.length === 0 && (
-            <Card className="bg-white shadow-lg text-center py-12">
+            <Card className="bg-white shadow-lg text-center py-12 col-span-2">
               <CardContent>
                 <Calendar className="h-12 w-12 text-[#C08777] mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-[#7F4F61] mb-2">No events scheduled</h3>
