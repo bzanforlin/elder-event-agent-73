@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ const Navigation = () => {
           <Link to="/" className="flex items-center space-x-2">
             <Heart className="h-8 w-8 text-[#EFD492]" />
             <div>
-              <h1 className="text-xl font-bold text-white">ResidentLines</h1>
+              <h1 className="text-xl font-bold text-white">Gertrude</h1>
               <p className="text-xs text-[#AFD0CD]">Assisted Living Event Planning</p>
             </div>
           </Link>
@@ -53,7 +52,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between p-4">
           <Link to="/" className="flex items-center space-x-2">
             <Heart className="h-6 w-6 text-[#EFD492]" />
-            <span className="text-lg font-bold text-white">ResidentLines</span>
+            <span className="text-lg font-bold text-white">Gertrude</span>
           </Link>
 
           <Button
