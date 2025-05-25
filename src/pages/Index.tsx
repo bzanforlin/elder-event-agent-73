@@ -82,7 +82,7 @@ const Index = () => {
             <Heart className="h-16 w-16 text-[#7F4F61]" />
           </div>
           <h1 className="text-5xl font-bold text-[#7F4F61] mb-6">
-            Welcome to ResidentLines
+            Welcome to Gertrude
           </h1>
           <p className="text-xl text-[#7F4F61] max-w-3xl mx-auto leading-relaxed">
             Create activities that your residents will thank you for.
@@ -158,7 +158,7 @@ const Index = () => {
                     disabled={!newElderName.trim() || isCreating}
                     className="bg-[#C08777] hover:bg-[#C08777]/90 text-white"
                   >
-                    {isCreating ? "Creating..." : "Create Elder Profile"}
+                    {isCreating ? "Creating..." : "Add Resident"}
                   </Button>
                 </div>
               </div>
@@ -211,7 +211,7 @@ const Index = () => {
         {/* Footer */}
         <div className="text-center mt-16 pt-8 border-t border-[#7F4F61]/20">
           <p className="text-[#7F4F61]">
-            ResidentLines - Bringing meaningful connections to assisted living
+            Gertrude - Bringing meaningful connections to assisted living
             communities
           </p>
         </div>
