@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Users, FileText, Calendar, Plus, MessageCircle, Heart } from 'lucide-react';
@@ -13,12 +12,10 @@ const Index = () => {
             <Heart className="h-16 w-16 text-[#7F4F61]" />
           </div>
           <h1 className="text-5xl font-bold text-[#7F4F61] mb-6">
-            Welcome to CareEvents
+            Welcome to ResidentLines
           </h1>
           <p className="text-xl text-[#7F4F61] max-w-3xl mx-auto leading-relaxed">
-            An intelligent event planning platform for assisted living homes. 
-            Use AI-powered insights from resident conversations and preferences 
-            to create meaningful, personalized activities that bring joy and connection.
+            Create activities that your residents will thank you for.
           </p>
         </div>
 
@@ -63,7 +60,7 @@ const Index = () => {
         {/* Footer */}
         <div className="text-center mt-16 pt-8 border-t border-[#7F4F61]/20">
           <p className="text-[#7F4F61]">
-            CareEvents - Bringing meaningful connections to assisted living communities
+            ResidentLines - Bringing meaningful connections to assisted living communities
           </p>
         </div>
       </div>
