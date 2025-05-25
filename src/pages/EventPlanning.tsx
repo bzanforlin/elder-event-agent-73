@@ -129,7 +129,7 @@ const EventPlanning = () => {
               id: 1,
               sender: "llm",
               message:
-                "Hello! I'm here to help you plan the perfect event for your residents. I have access to information about each elder's preferences and history. What kind of event are you thinking about organizing?",
+                "Hello! I'm here to help you plan the perfect event for your residents. I can provide general guidance now, but once you save this event with a title and description, I'll have full access to resident preferences and can give you personalized recommendations. What kind of event are you thinking about organizing?",
               timestamp: new Date().toISOString(),
             },
           ]);
@@ -201,7 +201,7 @@ const EventPlanning = () => {
     const messageText = newMessage;
     setNewMessage(""); // Clear input immediately
 
-    // For new events, we can't send real messages yet, so use mock behavior
+    // For new events, we can't send real messages yet, so provide helpful guidance
     if (!isEditing || !eventId) {
       const userMessage: ChatMessage = {
         id: Date.now(),
@@ -212,13 +212,34 @@ const EventPlanning = () => {
 
       setChatMessages((prev) => [...prev, userMessage]);
 
-      // Simulate AI response for new events
+      // Provide helpful guidance for new events
       setTimeout(() => {
+        let aiResponse = "";
+
+        if (messageText.toLowerCase().includes("music")) {
+          aiResponse =
+            "Great choice! Music events are wonderful for bringing residents together. I'd recommend setting up a comfortable space with good acoustics. Once you save this event, I'll be able to help you find residents who particularly enjoy music and suggest specific songs or activities based on their preferences.";
+        } else if (
+          messageText.toLowerCase().includes("game") ||
+          messageText.toLowerCase().includes("activity")
+        ) {
+          aiResponse =
+            "Games and activities are excellent for cognitive stimulation and social interaction! Consider the mobility levels of your residents when planning. After you save this event, I can help identify residents who would most enjoy this type of activity and suggest modifications to make it accessible for everyone.";
+        } else if (
+          messageText.toLowerCase().includes("food") ||
+          messageText.toLowerCase().includes("meal")
+        ) {
+          aiResponse =
+            "Food-related events are always popular! Consider dietary restrictions and preferences. Once you create this event, I'll be able to help you find residents with specific dietary needs or food preferences to ensure everyone can participate safely.";
+        } else {
+          aiResponse =
+            "That sounds like a wonderful idea! To give you the best recommendations for residents and activities, I'll need you to first save this event with a title and description. Once the event is created, I can access detailed information about each resident's preferences and help you plan the perfect event for them.";
+        }
+
         const aiMessage: ChatMessage = {
           id: Date.now() + 1,
           sender: "llm",
-          message:
-            "Based on the preferences of your residents, I suggest organizing an activity that combines their interests. For example, if you're planning a music event, Margaret would enjoy classical pieces while Eleanor would love the social aspect. Would you like me to help you set the date and select specific invitees for this event?",
+          message: aiResponse,
           timestamp: new Date().toISOString(),
         };
 
@@ -294,6 +315,8 @@ const EventPlanning = () => {
           title: "Success!",
           description: "Event updated successfully.",
         });
+
+        // Stay on the same page for updates
       } else {
         // Create new event
         const newEvent = await eventApi.create({
@@ -331,9 +354,10 @@ const EventPlanning = () => {
             console.error("Error sending initial chat message:", error);
           }
         }
-      }
 
-      navigate("/events");
+        // Navigate to the newly created event's edit page
+        navigate(`/events/${newEvent.id}/edit`);
+      }
     } catch (error) {
       console.error("Error saving event:", error);
       toast({
@@ -400,7 +424,7 @@ const EventPlanning = () => {
                       variant="secondary"
                       className="bg-yellow-100 text-yellow-800"
                     >
-                      Preview Mode
+                      General Guidance
                     </Badge>
                   )}
                 </CardTitle>
@@ -408,6 +432,12 @@ const EventPlanning = () => {
                   <p className="text-xs text-[#7F4F61]/70 mt-1">
                     💡 I can help you manage invitations and find residents by
                     interests (e.g., "find residents who like music"). Just ask!
+                  </p>
+                )}
+                {(!isEditing || !eventId) && (
+                  <p className="text-xs text-[#7F4F61]/70 mt-1">
+                    💡 Save your event first to unlock personalized resident
+                    recommendations and invitation management!
                   </p>
                 )}
               </CardHeader>
@@ -444,7 +474,7 @@ const EventPlanning = () => {
                     placeholder={
                       isEditing && eventId
                         ? "Ask about event planning..."
-                        : "Ask about event planning (preview mode)..."
+                        : "Ask for general event planning guidance..."
                     }
                     onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                     className="border-[#C08777]/30 focus:border-[#C08777]"
