@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ const EventPlanning = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isEditing = eventId && eventId !== "new";
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const [event, setEvent] = useState<EventForm>({
     title: "",
@@ -63,6 +64,18 @@ const EventPlanning = () => {
   const [suggestedResidents, setSuggestedResidents] = useState<number[]>([]);
   const [lastMessageCount, setLastMessageCount] = useState(0);
   const [lastEventUpdate, setLastEventUpdate] = useState<string>("");
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [chatMessages]);
 
   // Load data from API
   useEffect(() => {
@@ -404,7 +417,7 @@ const EventPlanning = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Chat Section */}
-            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61] flex flex-col">
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-[#7F4F61] flex flex-col h-[600px]">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-[#7F4F61]">
                   <div className="flex items-center">
@@ -441,8 +454,11 @@ const EventPlanning = () => {
                   </p>
                 )}
               </CardHeader>
-              <CardContent className="flex flex-col flex-1 p-6 pt-0">
-                <ScrollArea className="flex-1 pr-4 mb-4">
+              <CardContent className="flex flex-col flex-1 p-6 pt-0 min-h-0">
+                <ScrollArea
+                  ref={scrollAreaRef}
+                  className="flex-1 pr-4 mb-4 h-full"
+                >
                   <div className="space-y-4">
                     {chatMessages.map((message) => (
                       <div
@@ -467,7 +483,7 @@ const EventPlanning = () => {
                   </div>
                 </ScrollArea>
 
-                <div className="flex space-x-2 mt-auto pt-4 border-t border-[#AFD0CD]/30">
+                <div className="flex space-x-2 pt-4 border-t border-[#AFD0CD]/30 flex-shrink-0">
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
